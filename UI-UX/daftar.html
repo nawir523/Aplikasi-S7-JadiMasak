@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Masuk - Jadi Masak</title>
+    <title>Daftar Akun - Jadi Masak</title>
     <link rel="stylesheet" href="style.css" />
     <link
       rel="stylesheet"
@@ -19,8 +19,17 @@
           </div>
 
           <div class="auth-form">
-            <h2>Masuk ke akun Anda</h2>
-            <form id="login-form">
+            <h2>Daftar akun baru</h2>
+            <form id="register-form">
+              <div class="form-group">
+                <label for="nama">Nama</label>
+                <input
+                  type="text"
+                  id="nama"
+                  placeholder="Masukkan nama anda"
+                  required
+                />
+              </div>
               <div class="form-group">
                 <label for="email">Email</label>
                 <input
@@ -35,16 +44,25 @@
                 <input
                   type="password"
                   id="password"
-                  placeholder="Masukkan password anda"
+                  placeholder="Minimal 6 karakter"
                   required
                 />
               </div>
-              <button type="submit" class="btn btn-primary">Masuk</button>
+              <div class="form-group">
+                <label for="konfirmasi-password">Konfirmasi Password</label>
+                <input
+                  type="password"
+                  id="konfirmasi-password"
+                  placeholder="Masukkan password lagi"
+                  required
+                />
+              </div>
+              <button type="submit" class="btn btn-primary">Daftar</button>
             </form>
           </div>
 
           <p class="auth-switch">
-            Belum punya akun? <a id="btn-goto-daftar">Daftar di sini</a>
+            Sudah punya akun? <a id="btn-goto-login">Masuk di sini</a>
           </p>
         </div>
       </main>
