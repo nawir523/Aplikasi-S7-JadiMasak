@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "948278062393",
+    "project_id": "jadi-masak-apk",
+    "storage_bucket": "jadi-masak-apk.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:948278062393:android:6d60a11dc77fbdd05a8ce8",
+        "android_client_info": {
+          "package_name": "com.example.jadi_masak"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDao2Od_9RB0417vPbsDci5XI84ayTx3G4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
