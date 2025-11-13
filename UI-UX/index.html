@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Masuk - Jadi Masak</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="app-container">
+      <main class="page-content-auth">
+        <div class="auth-container">
+          <div class="logo-container">
+            <img src="Gambar/Logo.png" alt="Logo Jadi Masak" />
+          </div>
+
+          <div class="auth-form">
+            <h2>Masuk ke akun Anda</h2>
+            <form id="login-form">
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="Masukkan email anda"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="password">Password</label>
+                <input
+                  type="password"
+                  id="password"
+                  placeholder="Masukkan password anda"
+                  required
+                />
+              </div>
+              <button type="submit" class="btn btn-primary">Masuk</button>
+            </form>
+          </div>
+
+          <p class="auth-switch">
+            Belum punya akun? <a id="btn-goto-daftar">Daftar di sini</a>
+          </p>
+        </div>
+      </main>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

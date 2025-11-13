@@ -1,0 +1,74 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import 'features/auth/ui/login_screen.dart';
+import 'features/auth/ui/register_screen.dart';
+import 'features/home/ui/main_wrapper.dart';
+import 'features/recipes/ui/home_screen.dart';
+import 'features/pantry/ui/pantry_screen.dart';
+import 'features/profile/ui/profile_screen.dart';
+import 'features/recipes/ui/recipe_detail_screen.dart';
+import 'features/recipes/data/recipe_model.dart';
+
+// Global Key untuk navigasi (penting untuk context)
+final _rootNavigatorKey = GlobalKey<NavigatorState>();
+
+final router = GoRouter(
+  navigatorKey: _rootNavigatorKey,
+  initialLocation: '/login',
+  routes: [
+    // --- AUTH ROUTES ---
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => const LoginScreen(),
+    ),
+    GoRoute(
+      path: '/register',
+      builder: (context, state) => const RegisterScreen(),
+    ),
+
+    // --- MAIN APP ROUTES (Bottom Bar) ---
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) {
+        return MainWrapper(navigationShell: navigationShell);
+      },
+      branches: [
+        // Cabang 1: Home
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/home',
+              builder: (context, state) => const HomeScreen(),
+            ),
+          ],
+        ),
+        // Cabang 2: Kulkasku
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/pantry',
+              builder: (context, state) => const PantryScreen(),
+            ),
+          ],
+        ),
+        // Cabang 3: Profil
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/profile',
+              builder: (context, state) => const ProfileScreen(),
+            ),
+          ],
+        ),
+      ],
+    ),
+    GoRoute(
+      path: '/recipe-detail',
+      builder: (context, state) {
+        // Kita ambil data resep yang dikirim lewat 'extra'
+        final recipe = state.extra as RecipeModel;
+        return RecipeDetailScreen(recipe: recipe);
+      },
+    ),
+  ],
+);
