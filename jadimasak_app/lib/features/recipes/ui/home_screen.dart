@@ -5,20 +5,20 @@ import '../../../core/constants/app_colors.dart';
 import '../logic/recipe_provider.dart';
 import 'widgets/recipe_card.dart';
 
-// 3. Ubah jadi ConsumerWidget agar bisa mendengar Provider
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 4. Pantau data dari StreamProvider
-    final recipeAsyncValue = ref.watch(recipeStreamProvider);
+    final asyncData = ref.watch(recipeStreamProvider);
+
+    final filteredRecipes = ref.watch(filteredRecipesProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
-          // HEADER (Sapaan & Search) - Tetap sama
+          // HEADER (Sapaan & Search)
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -35,22 +35,28 @@ class HomeScreen extends ConsumerWidget {
                     style: TextStyle(color: Colors.grey, fontSize: 16),
                   ),
                   const SizedBox(height: 20),
-                  // Search Bar
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.search, color: Colors.grey),
-                        SizedBox(width: 10),
-                        Text("Cari Resep...", style: TextStyle(color: Colors.grey)),
-                      ],
+                  
+                  // --- SEARCH BAR ASLI (TextField) ---
+                  TextField(
+                    onChanged: (value) {
+                      // Update kata kunci di Provider saat mengetik
+                      ref.read(searchQueryProvider.notifier).state = value;
+                    },
+                    decoration: InputDecoration(
+                      hintText: "Cari 'Nasi Goreng'...",
+                      hintStyle: const TextStyle(color: Colors.grey),
+                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                     ),
                   ),
+                  // ------------------------------------
+                  
                   const SizedBox(height: 24),
                   const Text(
                     "Resep Terbaru 🔥",
@@ -61,15 +67,22 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
 
-          // 5. GRID RESEP (Dinamis dari Firebase)
-          recipeAsyncValue.when(
-            // A. Jika Data Tersedia
-            data: (recipes) {
-              if (recipes.isEmpty) {
+          // GRID RESEP
+          asyncData.when(
+            data: (_) {
+              // Jika hasil filter kosong
+              if (filteredRecipes.isEmpty) {
                 return const SliverToBoxAdapter(
-                  child: Center(child: Text("Belum ada resep.")),
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Text("Resep tidak ditemukan 😢"),
+                    ),
+                  ),
                 );
               }
+
+              // Tampilkan Grid dari filteredRecipes
               return SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 sliver: SliverGrid(
@@ -81,13 +94,9 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      final recipe = recipes[index];
-                      
-                      // Bungkus RecipeCard agar bisa diklik
+                      final recipe = filteredRecipes[index];
                       return GestureDetector(
                         onTap: () {
-                          // Pindah ke detail sambil bawa data 'recipe'
-                          // Gunakan context.push agar bisa di-back
                           context.push('/recipe-detail', extra: recipe);
                         },
                         child: RecipeCard(
@@ -97,18 +106,16 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       );
                     },
-                    childCount: recipes.length,
+                    childCount: filteredRecipes.length,
                   ),
                 ),
               );
             },
-            
-            // B. Jika Sedang Loading (Muncul muter-muter)
+            // Loading State
             loading: () => const SliverToBoxAdapter(
               child: Center(child: CircularProgressIndicator()),
             ),
-            
-            // C. Jika Error
+            // Error State
             error: (err, stack) => SliverToBoxAdapter(
               child: Center(child: Text("Error: $err")),
             ),

@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "jadimasak_app",
+            "cwd": "jadimasak_app",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "jadimasak_app (profile mode)",
+            "cwd": "jadimasak_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "jadimasak_app (release mode)",
+            "cwd": "jadimasak_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}
