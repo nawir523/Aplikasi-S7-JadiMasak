@@ -66,16 +66,6 @@ class _SplashScreenState extends State<SplashScreen> {
                     const Icon(Icons.restaurant_menu, size: 80, color: AppColors.primary),
               ),
             ),
-            const SizedBox(height: 20),
-            const Text(
-              "Jadi Masak",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.2,
-              ),
-            ),
             const SizedBox(height: 40),
             // Loading indicator putih kecil
             const CircularProgressIndicator(
