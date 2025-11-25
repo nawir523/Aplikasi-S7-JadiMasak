@@ -61,9 +61,16 @@ class _SplashScreenState extends State<SplashScreen> {
                 'assets/images/logo.png',
                 width: 100,
                 height: 100,
-                // Jika gambar logo gagal dimuat, pakai Icon ini:
-                errorBuilder: (context, error, stackTrace) => 
-                    const Icon(Icons.restaurant_menu, size: 80, color: AppColors.primary),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "Powered By Awing",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
               ),
             ),
             const SizedBox(height: 40),

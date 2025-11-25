@@ -18,8 +18,8 @@ class MatchingResultScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Saran Masak 🍳"),
-        backgroundColor: Colors.white,
+        title: const Text("Saran Masakan"),
+        backgroundColor: AppColors.primary,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -68,25 +68,29 @@ class MatchingResultScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. KARTU RESEP (Tumpuk dengan Badge)
             Stack(
               children: [
+             
                 RecipeCard(
+                  id: match.recipe.id,           
                   title: match.recipe.title,
+                  category: match.recipe.category,
                   time: match.recipe.time,
+                  servings: match.recipe.servings, 
                   imageUrl: match.recipe.imageUrl,
                 ),
-                // Badge Merah (Jika ada yang kurang)
+                
+                // Badge "Kurang Bahan"
                 if (match.missingIngredients.isNotEmpty)
                   Positioned(
                     top: 10,
-                    right: 10,
+                    left: 10, 
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
+                        boxShadow: const [
                           BoxShadow(color: Colors.black26, blurRadius: 4)
                         ],
                       ),
@@ -103,7 +107,7 @@ class MatchingResultScreen extends ConsumerWidget {
               ],
             ),
             
-            // 2. LIST BAHAN YANG KURANG (Teks di bawah kartu)
+            // List Bahan Kurang
             if (match.missingIngredients.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 8.0, left: 4),
@@ -113,7 +117,7 @@ class MatchingResultScreen extends ConsumerWidget {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        "Harus beli: ${match.missingIngredients.join(', ')}",
+                        "Bahan yang kurang: ${match.missingIngredients.join(', ')}",
                         style: TextStyle(
                           color: Colors.red[700],
                           fontSize: 13,

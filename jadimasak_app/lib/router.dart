@@ -11,6 +11,7 @@ import 'features/recipes/ui/recipe_detail_screen.dart';
 import 'features/recipes/data/recipe_model.dart';
 import 'features/search/ui/matching_result_screen.dart';
 import 'features/auth/ui/splash_screen.dart';
+import 'features/recipes/ui/saved_recipes_screen.dart';
 
 // Global Key untuk navigasi (penting untuk context)
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -79,6 +80,10 @@ final router = GoRouter(
     GoRoute(
       path: '/search-result',
       builder: (context, state) => const MatchingResultScreen(),
+    ),
+    GoRoute(
+      path: '/saved-recipes',
+      builder: (context, state) => const SavedRecipesScreen(),
     ),
   ],
 );

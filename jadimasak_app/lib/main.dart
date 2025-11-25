@@ -34,6 +34,12 @@ class JadiMasakApp extends StatelessWidget {
           secondary: AppColors.secondary,
           surface: AppColors.background,
         ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+        ),
         useMaterial3: true,
         textTheme: GoogleFonts.poppinsTextTheme(),
       ),
