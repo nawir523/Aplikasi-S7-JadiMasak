@@ -6,7 +6,6 @@ import '../../../core/widgets/custom_text_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../logic/auth_controller.dart';
 
-// 1. Ubah menjadi ConsumerStatefulWidget
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
@@ -14,24 +13,23 @@ class RegisterScreen extends ConsumerStatefulWidget {
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-// 2. Ubah menjadi ConsumerState
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController(); // <-- 1. Controller Baru
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // 3. Definisikan isLoading menggunakan ref.watch
-    // Ini akan mendengarkan perubahan state loading dari controller
     final isLoading = ref.watch(authStateProvider);
 
     return Scaffold(
@@ -70,7 +68,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   // Input Nama
                   CustomTextField(
                     label: "Nama Lengkap",
-                    hint: "masukkan nama Anda",
+                    hint: "masukkan nama lengkap kamu",
                     controller: _nameController,
                     prefixIcon: Icons.person_outline,
                   ),
@@ -79,7 +77,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   // Input Email
                   CustomTextField(
                     label: "Email",
-                    hint: "masukkan email Anda",
+                    hint: "masukkan email kamu",
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     prefixIcon: Icons.email_outlined,
@@ -90,8 +88,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   CustomTextField(
                     label: "Password",
                     hint: "Minimal 6 karakter",
-                    isPassword: true,
+                    isPassword: true, // Icon mata otomatis muncul
                     controller: _passwordController,
+                    prefixIcon: Icons.lock_outline,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // --- 2. Input Konfirmasi Password ---
+                  CustomTextField(
+                    label: "Konfirmasi Password",
+                    hint: "Ulangi password",
+                    isPassword: true,
+                    controller: _confirmPasswordController,
                     prefixIcon: Icons.lock_outline,
                   ),
                   const SizedBox(height: 32),
@@ -99,19 +107,31 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   // Tombol Daftar
                   PrimaryButton(
                     text: "Daftar Sekarang",
-                    isLoading: isLoading, // <-- Variabel ini sekarang sudah dikenali
+                    isLoading: isLoading,
                     onPressed: () {
-                      // Validasi sederhana
+                      // --- 3. Validasi Lengkap ---
                       if (_nameController.text.isEmpty ||
                           _emailController.text.isEmpty ||
-                          _passwordController.text.isEmpty) {
+                          _passwordController.text.isEmpty ||
+                          _confirmPasswordController.text.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text("Semua kolom harus diisi!")),
                         );
                         return;
                       }
 
-                      // Panggil Logic AuthController
+                      // Cek Password Sama
+                      if (_passwordController.text != _confirmPasswordController.text) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Konfirmasi password tidak cocok!"),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+
+                      // Panggil Logic
                       ref.read(authControllerProvider).register(
                             name: _nameController.text.trim(),
                             email: _emailController.text.trim(),
@@ -124,16 +144,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                     backgroundColor: Colors.green,
                                   ),
                                 );
-                                context.pop(); // Kembali ke Login
+                                context.pop(); 
                               }
                             },
                             onError: (message) {
                               if (mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(message),
-                                    backgroundColor: Colors.red,
-                                  ),
+                                  SnackBar(content: Text(message), backgroundColor: Colors.red),
                                 );
                               }
                             },

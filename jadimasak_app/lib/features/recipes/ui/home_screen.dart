@@ -74,7 +74,7 @@ class HomeScreen extends ConsumerWidget {
                            Text("Tersimpan", style: TextStyle(color: Colors.white, fontSize: 10))
                         ],
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),

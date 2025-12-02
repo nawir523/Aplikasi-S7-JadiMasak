@@ -15,26 +15,22 @@ class AuthService {
     required String name,
   }) async {
     try {
-      // 1. Buat akun di Firebase Auth
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // 2. Simpan data tambahan ke Firestore (Sesuai ERD Section 3)
       String uid = userCredential.user!.uid;
       await _firestore.collection('users').doc(uid).set({
         'email': email,
         'displayName': name,
-        'subscription_status': 'free', // Default status
+        'subscription_status': 'free',
         'created_at': FieldValue.serverTimestamp(),
       });
 
-      // 3. Update Display Name di Auth profile juga (untuk kemudahan)
       await userCredential.user!.updateDisplayName(name);
       
     } on FirebaseAuthException catch (e) {
-      // Melempar error agar bisa ditangkap UI
       throw _handleAuthError(e);
     } catch (e) {
       throw 'Terjadi kesalahan: $e';
@@ -55,7 +51,41 @@ class AuthService {
     await _auth.signOut();
   }
 
-  // Helper: Menerjemahkan kode error Firebase ke Bahasa Indonesia
+  // Fungsi Reset Password
+  Future<void> sendPasswordReset(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthError(e);
+    }
+  }
+
+  // --- FUNGSI BARU: UPDATE PROFIL ---
+  Future<void> updateProfile({String? name, String? photoUrl}) async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        // 1. Update data di Auth (User Token)
+        if (name != null) await user.updateDisplayName(name);
+        if (photoUrl != null) await user.updatePhotoURL(photoUrl);
+        
+        // 2. Update juga di Firestore (Database User)
+        // SetOptions(merge: true) penting agar data lain tidak terhapus
+        await _firestore.collection('users').doc(user.uid).set({
+          if (name != null) 'displayName': name,
+          if (photoUrl != null) 'photoURL': photoUrl,
+        }, SetOptions(merge: true)); 
+        
+        // Reload user agar data terbaru terbaca di aplikasi
+        await user.reload(); 
+      }
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthError(e);
+    }
+  }
+  // ----------------------------------
+
+  // Helper Error
   String _handleAuthError(FirebaseAuthException e) {
     switch (e.code) {
       case 'email-already-in-use':

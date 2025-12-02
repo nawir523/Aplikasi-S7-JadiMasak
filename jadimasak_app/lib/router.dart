@@ -12,6 +12,10 @@ import 'features/recipes/data/recipe_model.dart';
 import 'features/search/ui/matching_result_screen.dart';
 import 'features/auth/ui/splash_screen.dart';
 import 'features/recipes/ui/saved_recipes_screen.dart';
+import 'features/auth/ui/onboarding_screen.dart';
+import 'features/profile/ui/edit_profile_screen.dart';
+import 'features/recipes/ui/add_recipe_screen.dart';
+import 'features/profile/ui/my_recipes_screen.dart';
 
 // Global Key untuk navigasi (penting untuk context)
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -25,10 +29,17 @@ final router = GoRouter(
       path: '/',
       builder: (context, state) => const SplashScreen(),
     ),
+
+    GoRoute(
+      path: '/onboarding',
+      builder: (context, state) => const OnboardingScreen(),
+    ),
+
     GoRoute(
       path: '/login',
       builder: (context, state) => const LoginScreen(),
     ),
+
     GoRoute(
       path: '/register',
       builder: (context, state) => const RegisterScreen(),
@@ -58,6 +69,15 @@ final router = GoRouter(
             ),
           ],
         ),
+        // Cabang 3: Tulis Resep
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/add-recipe',
+              builder: (context, state) => const AddRecipeScreen(),
+            ),
+          ],
+        ),
         // Cabang 3: Profil
         StatefulShellBranch(
           routes: [
@@ -84,6 +104,34 @@ final router = GoRouter(
     GoRoute(
       path: '/saved-recipes',
       builder: (context, state) => const SavedRecipesScreen(),
+    ),
+
+    // --- PROFILE ROUTES ---
+    GoRoute(
+      path: '/edit-profile',
+      builder: (context, state) => const EditProfileScreen(),
+    ),
+
+    // --- RECIPE ROUTES ---
+    GoRoute(
+      path: '/add-recipe',
+      builder: (context, state) => const AddRecipeScreen(),
+    ),
+
+    // --- MY RECIPES ROUTE ---
+    GoRoute(
+      path: '/my-recipes',
+      builder: (context, state) => const MyRecipesScreen(),
+    ),
+
+    // --- EDIT RECIPE ROUTE ---
+    GoRoute(
+      path: '/edit-recipe',
+      builder: (context, state) {
+        // Ambil data resep yang dikirim
+        final recipeToEdit = state.extra as RecipeModel; 
+        return AddRecipeScreen(recipeToEdit: recipeToEdit);
+      },
     ),
   ],
 );

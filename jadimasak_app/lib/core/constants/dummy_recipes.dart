@@ -36,39 +36,6 @@ final List<Map<String, dynamic>> dummyRecipes = [
     ]
   },
 
-  // 3. Telur Balado
-  {
-    "title": "Telur Balado",
-    "category": "Lauk Pauk / Pedas",
-    "time": "25 Menit",
-    "servings": "4 Orang",
-    "image_url": "https://images.unsplash.com/photo-1563553544-3a7a04018273?auto=format&fit=crop&w=500&q=60",
-    "instructions": "1. Goreng telur rebus hingga kulitnya berkulit (kuning kecokelatan). Angkat.\n2. Tumis bumbu halus, daun jeruk, dan serai hingga matang dan minyak terpisah.\n3. Bumbui dengan gula, garam, dan penyedap. Koreksi rasa.\n4. Masukkan telur goreng. Aduk rata hingga telur terbalut bumbu.",
-    "ingredients_list": [
-      {"name": "Telur Ayam", "qty": "6 butir"},
-      {"name": "Daun Jeruk", "qty": "2 lembar"},
-      {"name": "Serai", "qty": "1 batang"},
-      {"name": "Cabai Merah Keriting", "qty": "10 buah"},
-      {"name": "Bawang Merah", "qty": "5 butir"}
-    ]
-  },
-
-  // 4. Sayur Lodeh
-  {
-    "title": "Sayur Lodeh",
-    "category": "Sayuran / Berkuah Santan",
-    "time": "30 Menit",
-    "servings": "4-5 Orang",
-    "image_url": "https://images.unsplash.com/photo-1626118421731-246d0649d86d?auto=format&fit=crop&w=500&q=60",
-    "instructions": "1. Rebus air, masukkan jagung dan labu siam hingga setengah empuk.\n2. Tumis bumbu halus, daun salam, dan lengkuas hingga harum. Masukkan ke panci rebusan.\n3. Masukkan kacang panjang, terong, dan daun melinjo.\n4. Tuang santan instan sambil diaduk. Bumbui dengan garam dan gula merah. Masak hingga matang.",
-    "ingredients_list": [
-      {"name": "Labu Siam", "qty": "1 buah"},
-      {"name": "Terong Ungu", "qty": "1 buah"},
-      {"name": "Kacang Panjang", "qty": "5 lonjor"},
-      {"name": "Santan Instan", "qty": "65 ml"},
-      {"name": "Daun Melinjo", "qty": "secukupnya"}
-    ]
-  },
 
   // 5. Perkedel Kentang
   {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -17,21 +18,26 @@ class _SplashScreenState extends State<SplashScreen> {
     _checkLoginStatus();
   }
 
-  Future<void> _checkLoginStatus() async {
-    // 1. Tahan sebentar (misal 2 detik) agar logo terlihat (Branding)
+Future<void> _checkLoginStatus() async {
+    // Tahan sebentar
     await Future.delayed(const Duration(seconds: 2));
-
     if (!mounted) return;
 
-    // 2. Cek apakah ada user yang sedang login di memori HP
-    final user = FirebaseAuth.instance.currentUser;
+    // 1. Cek Apakah Pertama Kali Buka (via SharedPreferences)
+    final prefs = await SharedPreferences.getInstance();
+    final isFirstTime = prefs.getBool('isFirstTime') ?? true; // Default true jika belum ada data
 
-    if (user != null) {
-      // JIKA SUDAH LOGIN -> Ke Home
-      context.go('/home');
+    if (isFirstTime) {
+      // JIKA PENGGUNA BARU -> Ke Onboarding
+      context.go('/onboarding');
     } else {
-      // JIKA BELUM -> Ke Login
-      context.go('/login');
+      // JIKA PENGGUNA LAMA -> Cek Login Firebase
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        context.go('/home');
+      } else {
+        context.go('/login');
+      }
     }
   }
 

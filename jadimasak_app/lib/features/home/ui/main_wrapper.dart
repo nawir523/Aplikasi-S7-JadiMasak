@@ -55,6 +55,11 @@ class _MainWrapperState extends State<MainWrapper> {
                   label: 'Kulkasku',
                 ),
                 BottomNavigationBarItem(
+                  icon: Icon(Icons.add_circle_outline),
+                  activeIcon: Icon(Icons.add_circle),
+                  label: 'Tulis',
+                ),
+                BottomNavigationBarItem(
                   icon: Icon(Icons.person_rounded),
                   label: 'Profil',
                 ),

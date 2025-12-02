@@ -6,6 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../recipes/logic/bookmark_controller.dart';
 import '../../../core/services/seeder_service.dart';
+import '../../recipes/logic/recipe_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -18,6 +19,9 @@ class ProfileScreen extends ConsumerWidget {
     // 2. Ambil Data Statistik (Jumlah Resep Tersimpan)
     final savedRecipesAsync = ref.watch(bookmarkedIdsProvider);
     final savedCount = savedRecipesAsync.value?.length ?? 0;
+
+    final myRecipesAsync = ref.watch(userRecipesCountProvider);
+    final myRecipesCount = myRecipesAsync.value ?? 0;
 
     if (user == null) {
       return const Scaffold(body: Center(child: Text("Tidak ada user login.")));
@@ -108,6 +112,7 @@ class ProfileScreen extends ConsumerWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
+                            _buildStatItem("Resep Saya", myRecipesCount.toString()),
                             _buildStatItem("Tersimpan", savedCount.toString()),
                             _buildStatItem("Status", "Gratis"), // Bisa diganti Pro nanti
                           ],
@@ -130,12 +135,17 @@ class ProfileScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   _buildMenuTile(
+                    icon: Icons.menu_book_rounded,
+                    title: "Resep Saya",
+                    onTap: () {
+                      context.push('/my-recipes');
+                    },
+                  ),
+                  _buildMenuTile(
                     icon: Icons.edit_outlined,
                     title: "Edit Profil",
                     onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Fitur Edit Profil segera hadir di v1.5!")),
-                      );
+                      context.push('/edit-profile');
                     },
                   ),
                   _buildMenuTile(

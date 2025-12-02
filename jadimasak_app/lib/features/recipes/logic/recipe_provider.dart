@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../data/recipe_model.dart';
 
@@ -49,4 +50,16 @@ final filteredRecipesProvider = Provider<List<RecipeModel>>((ref) {
     loading: () => [],
     error: (_, __) => [],
   );
+});
+
+// Hitung Jumlah Resep User Saat Ini
+final userRecipesCountProvider = StreamProvider<int>((ref) {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return Stream.value(0);
+
+  return FirebaseFirestore.instance
+      .collection('recipes')
+      .where('userId', isEqualTo: user.uid) // Filter punya sendiri
+      .snapshots()
+      .map((snapshot) => snapshot.docs.length); // Ambil jumlahnya
 });
