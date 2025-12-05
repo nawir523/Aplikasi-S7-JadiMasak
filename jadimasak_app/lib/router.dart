@@ -16,6 +16,7 @@ import 'features/auth/ui/onboarding_screen.dart';
 import 'features/profile/ui/edit_profile_screen.dart';
 import 'features/recipes/ui/add_recipe_screen.dart';
 import 'features/profile/ui/my_recipes_screen.dart';
+import 'features/pantry/ui/shopping_list_screen.dart';
 
 // Global Key untuk navigasi (penting untuk context)
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -69,16 +70,17 @@ final router = GoRouter(
             ),
           ],
         ),
-        // Cabang 3: Tulis Resep
+        // Cabang 3: Belanja
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/add-recipe',
-              builder: (context, state) => const AddRecipeScreen(),
+              path: '/shopping-list',
+              builder: (context, state) => const ShoppingListScreen(),
             ),
           ],
         ),
-        // Cabang 3: Profil
+
+        // Cabang 4: Profil
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -89,6 +91,7 @@ final router = GoRouter(
         ),
       ],
     ),
+    
     GoRoute(
       path: '/recipe-detail',
       builder: (context, state) {
@@ -133,5 +136,6 @@ final router = GoRouter(
         return AddRecipeScreen(recipeToEdit: recipeToEdit);
       },
     ),
+
   ],
 );

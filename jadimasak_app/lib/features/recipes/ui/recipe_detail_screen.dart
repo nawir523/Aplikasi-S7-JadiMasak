@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/constants/app_colors.dart';
 import '../data/recipe_model.dart';
+import '../../pantry/logic/shopping_controller.dart';
 
-class RecipeDetailScreen extends StatelessWidget {
+class RecipeDetailScreen extends ConsumerWidget {
   final RecipeModel recipe;
 
   const RecipeDetailScreen({super.key, required this.recipe});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -28,10 +31,35 @@ class RecipeDetailScreen extends StatelessWidget {
                 onPressed: () => context.pop(),
               ),
             ),
+            
+            // Tombol Edit (Hanya jika pemilik resep)
+            actions: [
+              if (FirebaseAuth.instance.currentUser?.uid == recipe.userId)
+                Container(
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.black),
+                    tooltip: "Edit Resep",
+                    onPressed: () {
+                      context.push('/edit-recipe', extra: recipe);
+                    },
+                  ),
+                ),
+            ],
+
             flexibleSpace: FlexibleSpaceBar(
               background: Image.network(
                 recipe.imageUrl,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: Colors.grey[300],
+                  child: const Center(
+                      child: Icon(Icons.broken_image, size: 50, color: Colors.grey)),
+                ),
               ),
             ),
           ),
@@ -48,7 +76,7 @@ class RecipeDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Garis kecil di tengah atas
+                  // Garis Handle
                   Center(
                     child: Container(
                       width: 40, height: 4,
@@ -67,11 +95,11 @@ class RecipeDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
 
-                  // --- INFO BARU: KATEGORI (Badge) ---
+                  // KATEGORI (Badge)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1), // Background oranye pudar
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -85,10 +113,9 @@ class RecipeDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // --- INFO BARU: WAKTU & PORSI (Row) ---
+                  // WAKTU & PORSI
                   Row(
                     children: [
-                      // Waktu
                       const Icon(Icons.timer_outlined, color: Colors.grey, size: 20),
                       const SizedBox(width: 8),
                       Text(
@@ -96,9 +123,8 @@ class RecipeDetailScreen extends StatelessWidget {
                         style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w500),
                       ),
                       
-                      const SizedBox(width: 24), // Jarak pemisah
+                      const SizedBox(width: 24),
 
-                      // Porsi
                       const Icon(Icons.people_outline, color: Colors.grey, size: 20),
                       const SizedBox(width: 8),
                       Text(
@@ -110,18 +136,45 @@ class RecipeDetailScreen extends StatelessWidget {
                   
                   const Divider(height: 40),
 
-                  // DAFTAR BAHAN
-                  const Text(
-                    "Bahan-bahan",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  // HEADER BAHAN + TOMBOL BELANJA
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Bahan-bahan",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      // Tombol Belanja Kecil
+                      TextButton.icon(
+                        onPressed: () {
+                          // Ambil nama bahan saja untuk dimasukkan ke shopping list
+                          final ingredientNames = recipe.ingredients.map((e) {
+                            String name = e is Map ? e['name'] : e.toString();
+                            String qty = e is Map ? (e['qty'] ?? '') : '';
+                            // Format di list belanja: "Bawang (2 butir)"
+                            return qty.isNotEmpty && qty != 'secukupnya' ? "$name ($qty)" : name;
+                          }).toList();
+
+                          ref.read(shoppingControllerProvider).addMultipleItems(ingredientNames,
+                          recipe.title);
+                          
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Bahan masuk ke Daftar Belanja!"), backgroundColor: Colors.green),
+                          );
+                        },
+                        icon: const Icon(Icons.add_shopping_cart, size: 18),
+                        label: const Text("Belanja"),
+                        style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
-                  // Kita gunakan spread operator (...) untuk menampilkan list bahan
+
+                  // LIST BAHAN (Tampilan Baru Tanpa Kurung)
                   if (recipe.ingredients.isEmpty)
                     const Text("Data bahan belum tersedia.", style: TextStyle(color: Colors.grey))
                   else
                     ...recipe.ingredients.map((ing) {
-                      // ing bisa berupa Map atau String (jaga-jaga)
                       String name = '';
                       String qty = '';
                       
@@ -137,16 +190,24 @@ class RecipeDetailScreen extends StatelessWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.check_circle_outline, color: AppColors.secondary, size: 20),
-                            const SizedBox(width: 10),
+                            const Icon(Icons.fiber_manual_record, color: AppColors.secondary, size: 12), // Dot kecil
+                            const SizedBox(width: 12),
                             Expanded(
                               child: RichText(
                                 text: TextSpan(
-                                  style: const TextStyle(color: Colors.black, fontSize: 14),
+                                  style: const TextStyle(color: Colors.black87, fontSize: 15, height: 1.4),
                                   children: [
-                                    TextSpan(text: name, style: const TextStyle(fontWeight: FontWeight.w500)),
-                                    if (qty.isNotEmpty) 
-                                      TextSpan(text: " ($qty)", style: const TextStyle(color: Colors.grey)),
+                                    TextSpan(text: name),
+                                    if (qty.isNotEmpty) ...[
+                                      const TextSpan(text: "  "), // Spasi
+                                      TextSpan(
+                                        text: qty, // Tampilkan qty tanpa kurung
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold, 
+                                          color: Colors.grey
+                                        ),
+                                      ),
+                                    ]
                                   ],
                                 ),
                               ),

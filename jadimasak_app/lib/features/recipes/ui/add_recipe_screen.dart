@@ -9,6 +9,7 @@ import '../../../core/widgets/custom_text_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/services/cloudinary_service.dart';
 import '../data/recipe_model.dart';
+import '../../../core/constants/app_constants.dart';
 
 // Helper Class
 class IngredientInput {
@@ -45,9 +46,6 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
   bool _isUploading = false;
   String _selectedCategory = 'Menu Utama';
 
-  final List<String> _categories = [
-    'Menu Utama', 'Sayuran', 'Lauk Pauk', 'Camilan', 'Minuman', 'Dessert'
-  ];
 
   @override
   void initState() {
@@ -60,7 +58,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
       // MODE EDIT: Isi data lama
       final r = widget.recipeToEdit!;
       _titleController.text = r.title;
-      _selectedCategory = _categories.contains(r.category) ? r.category : 'Menu Utama';
+      _selectedCategory = AppConstants.recipeCategories[0];
       _timeController.text = r.time.replaceAll(RegExp(r'[^0-9]'), '');
       
       final servingParts = r.servings.split(' ');
@@ -285,7 +283,9 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               value: _selectedCategory,
-              items: _categories.map((cat) => DropdownMenuItem(value: cat, child: Text(cat))).toList(),
+              items: AppConstants.recipeCategories.map((cat) { 
+                return DropdownMenuItem(value: cat, child: Text(cat));
+              }).toList(),
               onChanged: (val) => setState(() => _selectedCategory = val!),
               decoration: InputDecoration(
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
