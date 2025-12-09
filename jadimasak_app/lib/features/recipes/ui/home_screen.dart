@@ -4,41 +4,14 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../logic/recipe_provider.dart';
 import 'widgets/recipe_card.dart';
+import '../../../core/widgets/banner_ad_widget.dart';
 import '../../../core/constants/app_constants.dart';
 
-class HomeScreen extends ConsumerStatefulWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    _fadeAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeIn,
-    );
-    _animationController.forward();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final filteredRecipes = ref.watch(filteredRecipesProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
     final isLoading = ref.watch(recipeStreamProvider).isLoading;
@@ -48,16 +21,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     return Scaffold(
       backgroundColor: Colors.grey[50],
       body: CustomScrollView(
+        physics: const BouncingScrollPhysics(), 
         slivers: [
-          // 1. HEADER + SEARCH BAR (Desain Khusus)
+          // 1. HEADER + SEARCH BAR
           const SliverToBoxAdapter(
-            child: _HomeHeader(), // Dipisah ke widget bawah biar rapi
+            child: _HomeHeader(),
           ),
 
           // 2. TOMBOL "TULIS RESEP"
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0), // Sedikit jarak dari search bar
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
@@ -165,62 +139,73 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           else
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 10, 20, 80),
-              sliver: SliverFadeTransition(
-                opacity: _fadeAnimation,
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 200,
-                    childAspectRatio: 0.7,
-                    crossAxisSpacing: 15,
-                    mainAxisSpacing: 15,
-                  ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final recipe = filteredRecipes[index];
-                      return GestureDetector(
-                        onTap: () => context.push('/recipe-detail', extra: recipe),
-                        child: Hero(
-                          tag: 'recipe_${recipe.id}',
-                          child: Material(
-                            color: Colors.transparent,
-                            child: RecipeCard(
-                              id: recipe.id,
-                              title: recipe.title,
-                              category: recipe.category,
-                              time: recipe.time,
-                              servings: recipe.servings,
-                              imageUrl: recipe.imageUrl,
-                            ),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 200,
+                  childAspectRatio: 0.7,
+                  crossAxisSpacing: 15,
+                  mainAxisSpacing: 15,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final recipe = filteredRecipes[index];
+                    return GestureDetector(
+                      onTap: () => context.push('/recipe-detail', extra: recipe),
+                      child: Hero(
+                        tag: 'recipe_${recipe.id}',
+                        child: Material(
+                          color: Colors.transparent,
+                          child: RecipeCard(
+                            id: recipe.id,
+                            title: recipe.title,
+                            category: recipe.category,
+                            time: recipe.time,
+                            servings: recipe.servings,
+                            imageUrl: recipe.imageUrl,
                           ),
                         ),
-                      );
-                    },
-                    childCount: filteredRecipes.length,
-                  ),
+                      ),
+                    );
+                  },
+                  childCount: filteredRecipes.length,
+                  addAutomaticKeepAlives: true, 
                 ),
               ),
             ),
+             // --- PASANG IKLAN DI SINI ---
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Column(
+                children: [
+                  Text("Disponsori", style: TextStyle(fontSize: 10, color: Colors.grey)),
+                  SizedBox(height: 8),
+                  BannerAdWidget(),
+                ],
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 20)), 
         ],
       ),
     );
   }
 }
 
-// === WIDGET HEADER TERPISAH (Agar kode lebih bersih) ===
+// === WIDGET HEADER TERPISAH 
 class _HomeHeader extends ConsumerWidget {
   const _HomeHeader();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SizedBox(
-      height: 170, // Tinggi total area header + separuh search bar
+      height: 170, 
       child: Stack(
         clipBehavior: Clip.none,
         alignment: Alignment.topCenter,
         children: [
-          // 1. Background Oranye
           Container(
-            height: 120, // Tinggi bagian oranye saja
+            height: 120, 
             padding: const EdgeInsets.only(top: 35, left: 20, right: 20),
             decoration: const BoxDecoration(
               color: AppColors.primary,
@@ -229,14 +214,13 @@ class _HomeHeader extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // LOGO & NAMA (Tanpa Kotak Putih)
                 Row(
                   children: [
                     Hero(
                       tag: 'app_logo',
                       child: Image.asset(
                         'assets/images/logo2.png',
-                        width: 45, // Sedikit lebih besar
+                        width: 45,
                         height: 45,
                         errorBuilder: (context, error, stackTrace) =>
                             const Icon(Icons.restaurant, color: Colors.white, size: 30),
@@ -244,17 +228,16 @@ class _HomeHeader extends ConsumerWidget {
                     ),
                     const SizedBox(width: 12),
                     const Text(
-                      "Jadi Masak",
+                      "Jadi MasaK",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
-                        fontWeight: FontWeight.w800, // Lebih tebal
+                        fontWeight: FontWeight.w800,
                         letterSpacing: 0.5,
                       ),
                     ),
                   ],
                 ),
-                // Tombol Tersimpan
                 Material(
                   color: Colors.transparent,
                   child: InkWell(
@@ -278,10 +261,8 @@ class _HomeHeader extends ConsumerWidget {
               ],
             ),
           ),
-
-          // 2. Search Bar (Posisi Absolute: Setengah di atas, setengah di bawah)
           Positioned(
-            bottom: 20, // Menempel di dasar Container utama (yang tingginya 190)
+            bottom: 20, 
             left: 10,
             right: 10,
             child: Container(
@@ -291,9 +272,9 @@ class _HomeHeader extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(25),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.3), // Shadow sedikit lebih tebal
+                    color: Colors.black.withOpacity(0.1),
                     blurRadius: 15,
-                    offset: const Offset(0, 8), // Shadow turun ke bawah
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
@@ -330,24 +311,17 @@ class CategoryHeaderDelegate extends SliverPersistentHeaderDelegate {
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
       color: Colors.grey[50],
-      padding: const EdgeInsets.fromLTRB(0, 35, 0, 10), 
-      
-      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Text(
               "Kategori",
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 16, 
-                color: AppColors.textPrimary
-              ),
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.textPrimary),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             ...categories.map((cat) {
               final isSelected = selectedCategory == cat;
               return Padding(
@@ -390,12 +364,10 @@ class CategoryHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  // PERBAIKAN DI SINI:
-  // Naikkan tinggi dari 65.0 menjadi 75.0 agar muat dengan padding baru
-  double get maxExtent => 75.0; 
+  double get maxExtent => 65.0;
 
   @override
-  double get minExtent => 75.0;
+  double get minExtent => 65.0;
 
   @override
   bool shouldRebuild(covariant CategoryHeaderDelegate oldDelegate) {

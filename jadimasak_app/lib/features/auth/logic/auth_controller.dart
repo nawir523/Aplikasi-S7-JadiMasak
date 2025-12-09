@@ -1,5 +1,8 @@
+import 'package:flutter/foundation.dart'; 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart'; 
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 import '../../../core/services/auth_service.dart';
 
 // 1. Provider untuk AuthService (agar bisa dipanggil di mana saja)
@@ -58,3 +61,38 @@ class AuthController {
 
 // 4. Provider untuk Controller
 final authControllerProvider = Provider<AuthController>((ref) => AuthController(ref));
+
+// --- FITUR BARU: FREEMIUM (Langganan Pro) ---
+
+// PROVIDER: Memantau Status Langganan User (Real-time)
+// Mengembalikan true jika PRO, false jika FREE
+final userSubscriptionProvider = StreamProvider<bool>((ref) {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return Stream.value(false); // Kalau belum login, anggap free
+
+  return FirebaseFirestore.instance
+      .collection('users')
+      .doc(user.uid)
+      .snapshots()
+      .map((snapshot) {
+        final data = snapshot.data();
+        if (data == null) return false;
+        // Cek field 'subscription_status' apakah isinya 'pro'
+        return data['subscription_status'] == 'pro';
+      });
+});
+
+// FUNGSI: Upgrade ke Pro (Simulasi)
+final upgradeProProvider = Provider((ref) {
+  return (VoidCallback onSuccess) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Ubah data di Firestore menjadi 'pro'
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+        'subscription_status': 'pro',
+        'pro_since': FieldValue.serverTimestamp(),
+      });
+      onSuccess();
+    }
+  };
+});

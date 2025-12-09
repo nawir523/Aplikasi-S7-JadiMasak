@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'core/constants/app_colors.dart';
 import 'router.dart';
 
 void main() async {
-  // 4. Pastikan binding widget siap
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 5. Inisialisasi Firebase dengan opsi yang barusan kita buat
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  MobileAds.instance.initialize();
 
   runApp(const ProviderScope(child: JadiMasakApp()));
 }

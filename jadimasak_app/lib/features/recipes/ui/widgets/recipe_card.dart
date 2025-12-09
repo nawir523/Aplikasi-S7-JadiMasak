@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart'; // Import ini wajib!
 import '../../../../core/constants/app_colors.dart';
 import '../../logic/bookmark_controller.dart';
 
@@ -11,6 +12,7 @@ class RecipeCard extends ConsumerWidget {
   final String servings;
   final String imageUrl;
 
+  // Gunakan const constructor agar widget tidak rebuilt jika parameter sama
   const RecipeCard({
     super.key,
     required this.id,
@@ -23,6 +25,8 @@ class RecipeCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Optimasi: Watch hanya nilai spesifik, bukan seluruh controller jika memungkinkan
+    // Tapi karena kita watch Future/Stream, ini sudah standar.
     final bookmarkedIds = ref.watch(bookmarkedIdsProvider).value ?? [];
     final isBookmarked = bookmarkedIds.contains(id);
 
@@ -32,8 +36,8 @@ class RecipeCard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
+            color: Colors.black.withOpacity(0.05), // Shadow lebih tipis biar ringan render-nya
+            blurRadius: 5,
             offset: const Offset(0, 2),
           ),
         ],
@@ -41,19 +45,31 @@ class RecipeCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. GAMBAR & TOMBOL (Stack)
+          // 1. GAMBAR (Optimized)
           Stack(
             children: [
-              // Gambar Resep
               AspectRatio(
-                aspectRatio: 1.25, // Sedikit lebih pendek agar teks punya ruang
+                aspectRatio: 1.25,
                 child: ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: Image.network(
-                    imageUrl,
+                  // GANTI Image.network DENGAN CachedNetworkImage
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Container(color: Colors.grey[200], child: const Icon(Icons.broken_image)),
+                    // Placeholder saat loading (Ringan)
+                    placeholder: (context, url) => Container(
+                      color: Colors.grey[200],
+                      child: const Center(
+                        child: Icon(Icons.restaurant, color: Colors.grey, size: 20),
+                      ),
+                    ),
+                    // Widget jika error / gagal load
+                    errorWidget: (context, url, error) => Container(
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.broken_image, color: Colors.grey),
+                    ),
+                    // Optimasi memori: Resize gambar agar tidak terlalu besar di memori
+                    memCacheWidth: 400, // Cukup 400px lebarnya untuk thumbnail
                   ),
                 ),
               ),
@@ -82,7 +98,7 @@ class RecipeCard extends ConsumerWidget {
                     child: Icon(
                       isBookmarked ? Icons.bookmark : Icons.bookmark_border,
                       color: isBookmarked ? AppColors.primary : Colors.grey,
-                      size: 18, // Ukuran ikon sedikit dikecilkan
+                      size: 18,
                     ),
                   ),
                 ),
@@ -92,16 +108,16 @@ class RecipeCard extends ConsumerWidget {
 
           // 2. INFO TEXT
           Padding(
-            padding: const EdgeInsets.fromLTRB(10, 8, 10, 10), // Padding disesuaikan
+            padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min, // Penting agar tidak memaksa ambil ruang sisa
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13), // Font 13 biar aman
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -110,22 +126,18 @@ class RecipeCard extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 10, color: Colors.grey),
                 ),
-                const SizedBox(height: 8), // Ganti Spacer dengan jarak fix
+                const SizedBox(height: 8),
                 Row(
                   children: [
-                    // Waktu
                     const Icon(Icons.access_time, size: 12, color: Colors.grey),
                     const SizedBox(width: 4),
                     Text(time, style: const TextStyle(fontSize: 10, color: Colors.grey)),
-                    
                     const SizedBox(width: 8),
-                    
-                    // Porsi
                     const Icon(Icons.people_outline, size: 12, color: Colors.grey),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        servings, 
+                        servings,
                         style: const TextStyle(fontSize: 10, color: Colors.grey),
                         overflow: TextOverflow.ellipsis,
                       ),

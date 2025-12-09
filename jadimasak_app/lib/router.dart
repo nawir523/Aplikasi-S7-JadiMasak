@@ -17,6 +17,7 @@ import 'features/profile/ui/edit_profile_screen.dart';
 import 'features/recipes/ui/add_recipe_screen.dart';
 import 'features/profile/ui/my_recipes_screen.dart';
 import 'features/pantry/ui/shopping_list_screen.dart';
+import 'features/profile/ui/premium_screen.dart';
 
 // Global Key untuk navigasi (penting untuk context)
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -136,6 +137,9 @@ final router = GoRouter(
         return AddRecipeScreen(recipeToEdit: recipeToEdit);
       },
     ),
-
+    GoRoute(
+      path: '/premium',
+      builder: (context, state) => const PremiumScreen(),
+    ),
   ],
 );

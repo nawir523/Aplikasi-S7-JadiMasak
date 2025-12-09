@@ -14,22 +14,28 @@ class PantryScreen extends ConsumerStatefulWidget {
 class _PantryScreenState extends ConsumerState<PantryScreen> {
   final _ingredientController = TextEditingController();
 
+  // Daftar Bahan Populer untuk "Quick Add"
+  final List<String> _popularIngredients = [
+    "Telur", "Nasi", "Ayam", "Tempe", "Tahu", 
+    "Cabai", "Bawang", "Kecap", "Mie", "Sosis"
+  ];
+
   @override
   void dispose() {
     _ingredientController.dispose();
     super.dispose();
   }
 
-  void _addIngredient() {
-    final text = _ingredientController.text.trim();
-    if (text.isEmpty) return;
+  void _addIngredient(String name) {
+    if (name.isEmpty) return;
 
     ref.read(pantryControllerProvider).addIngredient(
-      text,
+      name,
       onError: (msg) {
         if (mounted) {
+          // Tampilkan pesan error simpel
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(msg), backgroundColor: Colors.red),
+            SnackBar(content: Text(msg), backgroundColor: Colors.orange, duration: const Duration(seconds: 1)),
           );
         }
       },
@@ -43,204 +49,209 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
     final pantryAsync = ref.watch(pantryItemsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      // Floating Action Button Besar untuk Mencari Resep
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          context.push('/search-result');
-        },
-        backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.restaurant_menu, color: Colors.white),
-        label: const Text(
-          "Masak Apa Ya?", 
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      backgroundColor: Colors.grey[50], // Background sedikit abu biar konten nonjol
+      
+      // Tombol Cari Resep (Dibuat Lebih Menonjol)
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: SizedBox(
+          width: double.infinity,
+          height: 55,
+          child: ElevatedButton.icon(
+            onPressed: () => context.push('/search-result'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              elevation: 5,
+            ),
+            icon: const Icon(Icons.search, size: 24),
+            label: const Text(
+              "CARI RESEP DARI BAHAN INI", 
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
+            ),
+          ),
         ),
       ),
-      body: Column(
-        children: [
-          // 1. HEADER (Input Area)
-          Container(
-            padding: const EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 20),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 10,
-                  offset: Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Isi Kulkasku",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  "Masukkan bahan yang kamu punya di rumah.",
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _ingredientController,
-                        decoration: InputDecoration(
-                          hintText: "Contoh: Telur, Tempe, Bayam...",
-                          hintStyle: TextStyle(color: Colors.grey[400]),
-                          filled: true,
-                          fillColor: Colors.grey.shade100,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
+
+      body: CustomScrollView(
+        slivers: [
+          // 1. HEADER & INPUT
+          SliverToBoxAdapter(
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(20, 60, 20, 30),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 5))],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Isi Kulkasku",
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Masukkan bahan yang kamu punya, kami carikan resepnya!",
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // Input Field
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _ingredientController,
+                          decoration: InputDecoration(
+                            hintText: "Ketik bahan...",
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                          onSubmitted: (val) => _addIngredient(val.trim()),
                         ),
-                        onSubmitted: (_) => _addIngredient(),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    ElevatedButton(
-                      onPressed: _addIngredient,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                      const SizedBox(width: 12),
+                      InkWell(
+                        onTap: () => _addIngredient(_ingredientController.text.trim()),
+                        borderRadius: BorderRadius.circular(15),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: const Icon(Icons.add, color: Colors.white),
                         ),
-                        padding: const EdgeInsets.all(16),
                       ),
-                      child: const Icon(Icons.add),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+                  
+                  // --- FITUR BARU: PILIHAN CEPAT (QUICK ADD) ---
+                  const Text(
+                    "Tambahkan Cepat:",
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _popularIngredients.map((ing) {
+                      return InkWell(
+                        onTap: () => _addIngredient(ing),
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            "+ $ing", 
+                            style: const TextStyle(fontSize: 12, color: Colors.black87, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
             ),
           ),
 
-          // 2. DAFTAR BAHAN / EMPTY STATE
-          Expanded(
-            child: pantryAsync.when(
+          // 2. DAFTAR BAHAN YANG SUDAH MASUK
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 100), // Padding bawah besar utk tombol
+            sliver: pantryAsync.when(
               data: (snapshot) {
-                // --- EMPTY STATE (PANDUAN) ---
-                if (snapshot.docs.isEmpty) {
-                  return Center(
-                    child: SingleChildScrollView( // Agar aman di layar kecil
-                      padding: const EdgeInsets.all(40),
+                final docs = snapshot.docs;
+
+                if (docs.isEmpty) {
+                  return const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Ilustrasi (Icon Besar)
-                          Container(
-                            padding: const EdgeInsets.all(30),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.kitchen_rounded, 
-                              size: 80, 
-                              color: AppColors.primary,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          
-                          // Teks Panduan
-                          const Text(
-                            "Kulkasmu Masih Kosong!",
-                            style: TextStyle(
-                              fontSize: 18, 
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          const Text(
-                            "Yuk, catat bahan-bahan yang ada di rumahmu sekarang. Nanti aku bantu carikan resep yang cocok!",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.grey, height: 1.5),
-                          ),
-                          
-                          const SizedBox(height: 30),
-                          
-                          // Contoh Cara Pakai
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey.shade200),
-                            ),
-                            child: const Row(
-                              children: [
-                                Icon(Icons.lightbulb_outline, color: Colors.orange),
-                                SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    "Tips: Masukkan bahan satu per satu. Contoh: 'Telur', lalu tekan (+).",
-                                    style: TextStyle(fontSize: 12, color: Colors.black54),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          Icon(Icons.kitchen_outlined, size: 60, color: Colors.grey),
+                          SizedBox(height: 16),
+                          Text("Kulkas masih kosong", style: TextStyle(color: Colors.grey)),
                         ],
                       ),
                     ),
                   );
                 }
 
-                // --- TAMPILAN ADA ISI (CHIPS) ---
-                final docs = snapshot.docs;
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Ada ${docs.length} Bahan Tersedia:",
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
-                      ),
-                      const SizedBox(height: 10),
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: docs.map((doc) {
-                          final data = doc.data() as Map<String, dynamic>;
-                          return Chip(
-                            label: Text(
-                              data['name'] ?? '?',
-                              style: const TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                            backgroundColor: Colors.white,
-                            elevation: 2,
-                            shadowColor: Colors.black.withValues(alpha: 0.1),
-                            padding: const EdgeInsets.all(8),
-                            deleteIcon: const Icon(Icons.close, size: 18, color: Colors.red),
-                            onDeleted: () {
-                              ref.read(pantryControllerProvider).deleteIngredient(doc.id);
-                            },
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              side: BorderSide(color: Colors.grey.shade200),
-                            ),
-                          );
-                        }).toList(),
-                      ),
+                return SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      if (index == 0) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Text(
+                            "Ada ${docs.length} Bahan di Kulkas:", 
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                        );
+                      }
                       
-                      // Tambahan ruang di bawah agar tidak tertutup tombol FAB
-                      const SizedBox(height: 80),
-                    ],
+                      // Data items mulai dari index 0, tapi karena ada header teks di index 0 list,
+                      // kita geser index data dengan (index - 1)
+                      final doc = docs[index - 1];
+                      final data = doc.data() as Map<String, dynamic>;
+                      
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 5, offset: const Offset(0, 2)),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.check_circle, color: AppColors.secondary, size: 20),
+                                const SizedBox(width: 12),
+                                Text(
+                                  data['name'] ?? '?',
+                                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                                ),
+                              ],
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close, color: Colors.red, size: 20),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onPressed: () {
+                                ref.read(pantryControllerProvider).deleteIngredient(doc.id);
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    childCount: docs.length + 1, // +1 untuk Header Teks
                   ),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => Center(child: Text('Error: $err')),
+              loading: () => const SliverToBoxAdapter(child: Center(child: CircularProgressIndicator())),
+              error: (err, stack) => SliverToBoxAdapter(child: Text('Error: $err')),
             ),
           ),
         ],

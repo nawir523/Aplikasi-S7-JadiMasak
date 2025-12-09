@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cached_network_image/cached_network_image.dart'; // Pastikan import ini
 import '../../../core/constants/app_colors.dart';
 import '../data/recipe_model.dart';
-import '../../pantry/logic/shopping_controller.dart';
+import '../../pantry/logic/shopping_controller.dart'; 
+import '../../../core/widgets/banner_ad_widget.dart';
 
 class RecipeDetailScreen extends ConsumerWidget {
   final RecipeModel recipe;
@@ -23,7 +25,7 @@ class RecipeDetailScreen extends ConsumerWidget {
             leading: Container(
               margin: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.5),
+                color: Colors.white.withOpacity(0.5),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
@@ -32,13 +34,13 @@ class RecipeDetailScreen extends ConsumerWidget {
               ),
             ),
             
-            // Tombol Edit (Hanya jika pemilik resep)
+            // Tombol Edit
             actions: [
               if (FirebaseAuth.instance.currentUser?.uid == recipe.userId)
                 Container(
                   margin: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.5),
+                    color: Colors.white.withOpacity(0.5),
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
@@ -52,13 +54,13 @@ class RecipeDetailScreen extends ConsumerWidget {
             ],
 
             flexibleSpace: FlexibleSpaceBar(
-              background: Image.network(
-                recipe.imageUrl,
+              background: CachedNetworkImage( // Gunakan CachedNetworkImage
+                imageUrl: recipe.imageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  color: Colors.grey[300],
-                  child: const Center(
-                      child: Icon(Icons.broken_image, size: 50, color: Colors.grey)),
+                placeholder: (context, url) => Container(color: Colors.grey[200]),
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.grey[200],
+                  child: const Icon(Icons.broken_image, size: 50, color: Colors.grey),
                 ),
               ),
             ),
@@ -99,7 +101,7 @@ class RecipeDetailScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
+                      color: AppColors.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -144,19 +146,18 @@ class RecipeDetailScreen extends ConsumerWidget {
                         "Bahan-bahan",
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
-                      // Tombol Belanja Kecil
                       TextButton.icon(
                         onPressed: () {
-                          // Ambil nama bahan saja untuk dimasukkan ke shopping list
                           final ingredientNames = recipe.ingredients.map((e) {
                             String name = e is Map ? e['name'] : e.toString();
                             String qty = e is Map ? (e['qty'] ?? '') : '';
-                            // Format di list belanja: "Bawang (2 butir)"
                             return qty.isNotEmpty && qty != 'secukupnya' ? "$name ($qty)" : name;
                           }).toList();
 
-                          ref.read(shoppingControllerProvider).addMultipleItems(ingredientNames,
-                          recipe.title);
+                          ref.read(shoppingControllerProvider).addMultipleItems(
+                            ingredientNames,
+                            recipe.title
+                          );
                           
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text("Bahan masuk ke Daftar Belanja!"), backgroundColor: Colors.green),
@@ -170,7 +171,7 @@ class RecipeDetailScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
 
-                  // LIST BAHAN (Tampilan Baru Tanpa Kurung)
+                  // LIST BAHAN
                   if (recipe.ingredients.isEmpty)
                     const Text("Data bahan belum tersedia.", style: TextStyle(color: Colors.grey))
                   else
@@ -190,7 +191,7 @@ class RecipeDetailScreen extends ConsumerWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.fiber_manual_record, color: AppColors.secondary, size: 12), // Dot kecil
+                            const Icon(Icons.fiber_manual_record, color: AppColors.secondary, size: 12),
                             const SizedBox(width: 12),
                             Expanded(
                               child: RichText(
@@ -199,13 +200,10 @@ class RecipeDetailScreen extends ConsumerWidget {
                                   children: [
                                     TextSpan(text: name),
                                     if (qty.isNotEmpty) ...[
-                                      const TextSpan(text: "  "), // Spasi
+                                      const TextSpan(text: "  "),
                                       TextSpan(
-                                        text: qty, // Tampilkan qty tanpa kurung
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold, 
-                                          color: Colors.grey
-                                        ),
+                                        text: qty,
+                                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
                                       ),
                                     ]
                                   ],
@@ -230,6 +228,15 @@ class RecipeDetailScreen extends ConsumerWidget {
                     style: const TextStyle(fontSize: 16, height: 1.6, color: AppColors.textPrimary),
                   ),
                   
+                  const SizedBox(height: 40),
+
+                  // --- IKLAN BANNER (Dalam Column yang sama) ---
+                  const Divider(),
+                  const Center(child: Text("Disponsori", style: TextStyle(fontSize: 10, color: Colors.grey))),
+                  const SizedBox(height: 10),
+                  const BannerAdWidget(),
+                  // -------------------------------------------
+
                   const SizedBox(height: 40),
                 ],
               ),
