@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; // 1. Import Riverpod
+import 'package:flutter_riverpod/flutter_riverpod.dart'; 
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import '../../features/auth/logic/auth_controller.dart'; // 2. Import Controller
+import '../../features/auth/logic/auth_controller.dart'; 
 
 class BannerAdWidget extends ConsumerStatefulWidget {
   const BannerAdWidget({super.key});

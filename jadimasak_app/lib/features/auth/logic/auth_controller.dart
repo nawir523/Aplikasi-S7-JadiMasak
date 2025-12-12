@@ -84,15 +84,21 @@ final userSubscriptionProvider = StreamProvider<bool>((ref) {
 
 // FUNGSI: Upgrade ke Pro (Simulasi)
 final upgradeProProvider = Provider((ref) {
-  return (VoidCallback onSuccess) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      // Ubah data di Firestore menjadi 'pro'
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-        'subscription_status': 'pro',
-        'pro_since': FieldValue.serverTimestamp(),
-      });
-      onSuccess();
+  return (VoidCallback onSuccess, Function(String) onError) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Update Firestore
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+          'subscription_status': 'pro',
+          'pro_since': FieldValue.serverTimestamp(),
+        });
+        onSuccess();
+      } else {
+        onError("User tidak ditemukan");
+      }
+    } catch (e) {
+      onError("Gagal upgrade: $e");
     }
   };
 });

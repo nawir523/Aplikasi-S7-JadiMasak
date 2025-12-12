@@ -4,13 +4,20 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../auth/logic/auth_controller.dart';
 
-class PremiumScreen extends ConsumerWidget {
+class PremiumScreen extends ConsumerStatefulWidget {
   const PremiumScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PremiumScreen> createState() => _PremiumScreenState();
+}
+
+class _PremiumScreenState extends ConsumerState<PremiumScreen> {
+  bool _isLoading = false; // State untuk loading
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary, // Full Oranye
+      backgroundColor: AppColors.primary,
       body: SafeArea(
         child: Stack(
           children: [
@@ -67,31 +74,45 @@ class PremiumScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 40),
 
-                  // Tombol Beli
+                  // Tombol Beli (Dengan Loading)
                   SizedBox(
                     width: double.infinity,
                     height: 55,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // PANGGIL LOGIC UPGRADE
-                        ref.read(upgradeProProvider)(() {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Selamat! Anda sekarang PRO Member! 🎉"), backgroundColor: Colors.green),
-                            );
-                            context.pop();
+                      onPressed: _isLoading ? null : () { 
+                        setState(() => _isLoading = true);
+
+                        ref.read(upgradeProProvider)(
+                          () { // On Success
+                            if (mounted) {
+                              setState(() => _isLoading = false);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Selamat! Anda sekarang PRO Member! 🎉"), backgroundColor: Colors.green),
+                              );
+                              context.pop(); // Keluar halaman
+                            }
+                          },
+                          (errorMsg) { // On Error
+                            if (mounted) {
+                              setState(() => _isLoading = false);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(errorMsg), backgroundColor: Colors.red),
+                              );
+                            }
                           }
-                        });
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       ),
-                      child: const Text(
-                        "Upgrade Sekarang - Rp 0 (Simulasi)",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
+                      child: _isLoading 
+                        ? const CircularProgressIndicator(color: AppColors.primary) // Loading Indicator
+                        : const Text(
+                            "Upgrade Sekarang - Rp 0 (Simulasi)",
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
                     ),
                   ),
                   const SizedBox(height: 20),
